@@ -116,6 +116,8 @@ export const fn = ( code, includes ) => func( code, includes ).call;
 export const attribute = ( name, nodeType ) => nodeObject( new AttributeNode( name, nodeType ) );
 export const property = ( name, nodeOrType ) => nodeObject( new PropertyNode( name, getConstNodeType( nodeOrType ) ) );
 
+export const convert = ( node, types ) => nodeObject( new ConvertNode( nodeObject( node ), types ) );
+
 export const bypass = nodeProxy( BypassNode );
 export const code = nodeProxy( CodeNode );
 export const context = nodeProxy( ContextNode );
@@ -179,6 +181,7 @@ export const invert = nodeProxy( MathNode, MathNode.INVERT );
 export const dFdx = nodeProxy( MathNode, MathNode.DFDX );
 export const dFdy = nodeProxy( MathNode, MathNode.DFDY );
 export const round = nodeProxy( MathNode, MathNode.ROUND );
+export const reciprocal = nodeProxy( MathNode, MathNode.RECIPROCAL );
 
 export const atan2 = nodeProxy( MathNode, MathNode.ATAN2 );
 export const min = nodeProxy( MathNode, MathNode.MIN );
@@ -263,6 +266,7 @@ export const modelViewPosition = nodeImmutable( ModelNode, ModelNode.VIEW_POSITI
 export const positionGeometry = nodeImmutable( PositionNode, PositionNode.GEOMETRY );
 export const positionLocal = nodeImmutable( PositionNode, PositionNode.LOCAL );
 export const positionWorld = nodeImmutable( PositionNode, PositionNode.WORLD );
+export const positionWorldDirection = nodeImmutable( PositionNode, PositionNode.WORLD_DIRECTION );
 export const positionView = nodeImmutable( PositionNode, PositionNode.VIEW );
 export const positionViewDirection = nodeImmutable( PositionNode, PositionNode.VIEW_DIRECTION );
 
@@ -289,6 +293,9 @@ export const element = nodeProxy( ArrayElementNode );
 
 // miscellaneous
 
-export const difference = ( a, b ) => nodeObject( abs( sub( a, b ) ) );
+export const lumaCoeffs = vec3( 0.2125, 0.7154, 0.0721 );
+
+export const luminance = ( color, luma = lumaCoeffs ) => dot( color, luma );
+export const difference = ( a, b ) => abs( sub( a, b ) );
 export const dotNV = clamp( dot( transformedNormalView, positionViewDirection ) );
 export const TBNViewMatrix = mat3( tangentView, bitangentView, normalView );
