@@ -17859,8 +17859,7 @@
 
 		// xr
 
-		const xr = new WebXRManager(_this, _gl, extensions, _multiviewStereo);
-		this.xr = xr;
+		this.xr = new WebXRManager(_this, _gl, extensions, _multiviewStereo);
 
 		// API
 
@@ -17890,7 +17889,7 @@
 			return target.set(_width, _height);
 		};
 		this.setSize = function (width, height, updateStyle) {
-			if (xr.isPresenting) {
+			if (this.xr.isPresenting) {
 				console.warn('THREE.WebGLRenderer: Can\'t change size while VR device is presenting.');
 				return;
 			}
@@ -17999,9 +17998,9 @@
 			bindingStates.dispose();
 			uniformsGroups.dispose();
 			programCache.dispose();
-			xr.dispose();
-			xr.removeEventListener('sessionstart', onXRSessionStart);
-			xr.removeEventListener('sessionend', onXRSessionEnd);
+			this.xr.dispose();
+			this.xr.removeEventListener('sessionstart', onXRSessionStart);
+			this.xr.removeEventListener('sessionend', onXRSessionEnd);
 			if (_transmissionRenderTarget) {
 				_transmissionRenderTarget.dispose();
 				_transmissionRenderTarget = null;
@@ -18207,11 +18206,11 @@
 		if (typeof self !== 'undefined') animation.setContext(self);
 		this.setAnimationLoop = function (callback) {
 			onAnimationFrameCallback = callback;
-			xr.setAnimationLoop(callback);
+			this.xr.setAnimationLoop(callback);
 			callback === null ? animation.stop() : animation.start();
 		};
-		xr.addEventListener('sessionstart', onXRSessionStart);
-		xr.addEventListener('sessionend', onXRSessionEnd);
+		this.xr.addEventListener('sessionstart', onXRSessionStart);
+		this.xr.addEventListener('sessionend', onXRSessionEnd);
 
 		// Rendering
 
@@ -18229,9 +18228,9 @@
 			// update camera matrices and frustum
 
 			if (camera.parent === null && camera.matrixWorldAutoUpdate === true) camera.updateMatrixWorld();
-			if (xr.enabled === true && xr.isPresenting === true) {
-				if (xr.cameraAutoUpdate === true) xr.updateCamera(camera);
-				camera = xr.getCamera(); // use XR camera for rendering
+			if (this.xr.enabled === true && this.xr.isPresenting === true) {
+				if (this.xr.cameraAutoUpdate === true) this.xr.updateCamera(camera);
+				camera = this.xr.getCamera(); // use XR camera for rendering
 			}
 
 			//
@@ -18271,7 +18270,7 @@
 
 			currentRenderState.setupLights(_this.physicallyCorrectLights);
 			if (camera.isArrayCamera) {
-				if (xr.enabled && xr.isMultiview) {
+				if (this.xr.enabled && this.xr.isMultiview) {
 					textures.deferTextureUploads = true;
 					renderScene(currentRenderList, scene, camera, camera.cameras[0].viewport);
 				} else {
