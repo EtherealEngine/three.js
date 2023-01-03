@@ -4,6 +4,7 @@ export { WebGLArrayRenderTarget } from './renderers/WebGLArrayRenderTarget.js';
 export { WebGL3DRenderTarget } from './renderers/WebGL3DRenderTarget.js';
 export { WebGLMultipleRenderTargets } from './renderers/WebGLMultipleRenderTargets.js';
 export { WebGLCubeRenderTarget } from './renderers/WebGLCubeRenderTarget.js';
+export { WebGLMultiviewRenderTarget } from './renderers/WebGLMultiviewRenderTarget.js';
 export { WebGLRenderTarget } from './renderers/WebGLRenderTarget.js';
 export { WebGLRenderer } from './renderers/WebGLRenderer.js';
 export { WebGL1Renderer } from './renderers/WebGL1Renderer.js';
