@@ -28185,6 +28185,8 @@ function WebGLRenderer( parameters = {} ) {
 
 	};
 
+	this.animation = animation;
+
 	this.xr.addEventListener( 'sessionstart', onXRSessionStart );
 	this.xr.addEventListener( 'sessionend', onXRSessionEnd );
 

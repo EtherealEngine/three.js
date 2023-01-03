@@ -18209,6 +18209,7 @@
 			this.xr.setAnimationLoop(callback);
 			callback === null ? animation.stop() : animation.start();
 		};
+		this.animation = animation;
 		this.xr.addEventListener('sessionstart', onXRSessionStart);
 		this.xr.addEventListener('sessionend', onXRSessionEnd);
 
