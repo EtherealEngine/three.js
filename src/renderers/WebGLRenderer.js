@@ -1027,7 +1027,6 @@ function WebGLRenderer( parameters = {} ) {
 
 		if ( camera.isArrayCamera ) {
 
-
 			if ( this.xr.enabled && this.xr.isMultiview ) {
 
 				textures.deferTextureUploads = true;
