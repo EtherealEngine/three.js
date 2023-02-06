@@ -1,5 +1,6 @@
 import { ArrayCamera } from '../../cameras/ArrayCamera.js';
 import { EventDispatcher } from '../../core/EventDispatcher.js';
+import { InstancedBufferAttribute } from '../../core/InstancedBufferAttribute.js';
 import { PerspectiveCamera } from '../../cameras/PerspectiveCamera.js';
 import { Vector3 } from '../../math/Vector3.js';
 import { Vector4 } from '../../math/Vector4.js';
@@ -8,9 +9,11 @@ import { WebGLRenderTarget } from '../WebGLRenderTarget.js';
 import { WebGLMultiviewRenderTarget } from '../WebGLMultiviewRenderTarget.js';
 import { WebXRController } from './WebXRController.js';
 import { DepthTexture } from '../../textures/DepthTexture.js';
+import { VelocityMaterial } from '../../materials/VelocityMaterial.js';
 import {
 	DepthFormat,
 	DepthStencilFormat,
+	HalfFloatType,
 	RGBAFormat,
 	UnsignedByteType,
 	UnsignedIntType,
@@ -40,6 +43,8 @@ class WebXRManager extends EventDispatcher {
 		const attributes = gl.getContextAttributes();
 		let initialRenderTarget = null;
 		let newRenderTarget = null;
+		let velocityRenderTarget = null;
+		let isRenderingSpaceWarp = false;
 
 		const controllers = [];
 		const controllerInputSources = [];
@@ -176,6 +181,7 @@ class WebXRManager extends EventDispatcher {
 			glBinding = null;
 			session = null;
 			newRenderTarget = null;
+			velocityRenderTarget = null;
 
 			//
 
@@ -252,6 +258,8 @@ class WebXRManager extends EventDispatcher {
 			session = value;
 
 			if ( session !== null ) {
+
+				session.updateTargetFrameRate( 120 );
 
 				initialRenderTarget = renderer.getRenderTarget();
 
@@ -636,6 +644,8 @@ class WebXRManager extends EventDispatcher {
 		// Animation Loop
 
 		let onAnimationFrameCallback = null;
+		let onVelocityCallback = null;
+		let glSubImage = null;
 
 		function onAnimationFrame( time, frame ) {
 
@@ -676,7 +686,7 @@ class WebXRManager extends EventDispatcher {
 
 					} else {
 
-						const glSubImage = glBinding.getViewSubImage( glProjLayer, view );
+						glSubImage = glBinding.getViewSubImage( glProjLayer, view );
 						viewport = glSubImage.viewport;
 						// For side-by-side projection, we only produce a single texture for both eyes.
 						if ( i === 0 ) {
@@ -684,7 +694,7 @@ class WebXRManager extends EventDispatcher {
 							renderer.setRenderTargetTextures(
 								newRenderTarget,
 								glSubImage.colorTexture,
-								glProjLayer.ignoreDepthValues ? undefined : glSubImage.depthStencilTexture );
+								undefined );
 
 							renderer.setRenderTarget( newRenderTarget );
 
@@ -739,6 +749,41 @@ class WebXRManager extends EventDispatcher {
 			}
 
 			if ( onAnimationFrameCallback ) onAnimationFrameCallback( time, frame );
+
+			if ( onVelocityCallback ) {
+
+				isRenderingSpaceWarp = true;
+
+				if ( velocityRenderTarget === null ) {
+
+					const rtOptions = {
+						format: RGBAFormat,
+						type: HalfFloatType,
+						depthTexture: new DepthTexture( glSubImage.depthStencilTextureWidth, glSubImage.textureHeight, UnsignedInt248Type, undefined, undefined, undefined, undefined, undefined, undefined, DepthFormat ),
+						stencilBuffer: attributes.stencil,
+						encoding: renderer.outputEncoding,
+						samples: 0
+					};
+
+					velocityRenderTarget = new WebGLMultiviewRenderTarget( glSubImage.motionVectorTextureWidth, glSubImage.motionVectorTextureHeight, 2, rtOptions );
+
+				}
+
+				renderer.setRenderTargetTextures(
+					velocityRenderTarget,
+					glSubImage.motionVectorTexture,
+					glSubImage.depthStencilTexture );
+
+				renderer.setRenderTarget( velocityRenderTarget );
+
+				cameraVR.cameras[ 0 ].viewport.set( 0, 0, glSubImage.motionVectorTextureWidth, glSubImage.motionVectorTextureHeight );
+				cameraVR.cameras[ 1 ].viewport.set( 0, 0, glSubImage.motionVectorTextureWidth, glSubImage.motionVectorTextureHeight );
+
+				onVelocityCallback( time, frame );
+
+				isRenderingSpaceWarp = false;
+
+			}
 
 			if ( frame.detectedPlanes ) {
 
@@ -803,13 +848,65 @@ class WebXRManager extends EventDispatcher {
 
 		}
 
+		this.spaceWarpOnBeforeRender = function ( object, material ) {
+
+			if ( isRenderingSpaceWarp === false ) {
+
+				return material;
+
+			}
+
+			if ( object._velocityMaterial === undefined ) {
+
+				object._velocityMaterial = new VelocityMaterial( {
+					side: material.side
+				} );
+
+				object._velocityMaterial.precision = 'highp';
+
+				if ( object.isInstancedMesh === true ) {
+
+					object.previousInstanceMatrix = new InstancedBufferAttribute( new Float32Array( object.instanceMatrix.count * 16 ), object.instanceMatrix.count );
+					object.previousInstanceMatrix.copy( object.instanceMatrix );
+					object.previousInstanceMatrix.needsUpdate = true;
+
+				}
+
+			}
+
+			return object._velocityMaterial;
+
+		};
+
+		this.spaceWarpOnAfterRender = function ( object ) {
+
+			if ( isRenderingSpaceWarp === false ) {
+
+				return;
+
+			}
+
+			object._velocityMaterial.previousViewMatrices[ 0 ].copy( cameraVR.cameras[ 0 ].matrixWorldInverse );
+			object._velocityMaterial.previousViewMatrices[ 1 ].copy( cameraVR.cameras[ 1 ].matrixWorldInverse );
+			object._velocityMaterial.previousModelMatrix.copy( object.matrixWorld );
+
+			if ( object.isInstancedMesh === true ) {
+
+				object.previousInstanceMatrix.copy( object.instanceMatrix );
+				object.previousInstanceMatrix.needsUpdate = true;
+
+			}
+
+		};
+
 		const animation = new WebGLAnimation();
 
 		animation.setAnimationLoop( onAnimationFrame );
 
-		this.setAnimationLoop = function ( callback ) {
+		this.setAnimationLoop = function ( callback, velocityCallback ) {
 
 			onAnimationFrameCallback = callback;
+			onVelocityCallback = velocityCallback;
 
 		};
 
