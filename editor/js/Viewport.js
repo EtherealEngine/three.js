@@ -279,7 +279,7 @@ function Viewport( editor ) {
 	}
 
 	container.dom.addEventListener( 'mousedown', onMouseDown );
-	container.dom.addEventListener( 'touchstart', onTouchStart );
+	container.dom.addEventListener( 'touchstart', onTouchStart, { passive: false } );
 	container.dom.addEventListener( 'dblclick', onDoubleClick );
 
 	// controls need to be added *after* main logic,
@@ -292,7 +292,7 @@ function Viewport( editor ) {
 		signals.refreshSidebarObject3D.dispatch( camera );
 
 	} );
-	viewHelper.controls = controls;
+	viewHelper.center = controls.center;
 
 	// signals
 
@@ -481,7 +481,7 @@ function Viewport( editor ) {
 
 	// background
 
-	signals.sceneBackgroundChanged.add( function ( backgroundType, backgroundColor, backgroundTexture, backgroundEquirectangularTexture, backgroundBlurriness ) {
+	signals.sceneBackgroundChanged.add( function ( backgroundType, backgroundColor, backgroundTexture, backgroundEquirectangularTexture, backgroundBlurriness, backgroundIntensity ) {
 
 		switch ( backgroundType ) {
 
@@ -514,6 +514,7 @@ function Viewport( editor ) {
 					backgroundEquirectangularTexture.mapping = THREE.EquirectangularReflectionMapping;
 					scene.background = backgroundEquirectangularTexture;
 					scene.backgroundBlurriness = backgroundBlurriness;
+					scene.backgroundIntensity = backgroundIntensity;
 
 				}
 

@@ -43,7 +43,7 @@ class Object3D extends EventDispatcher {
 		this.parent = null;
 		this.children = [];
 
-		this.up = Object3D.DefaultUp.clone();
+		this.up = Object3D.DEFAULT_UP.clone();
 
 		const position = new Vector3();
 		const rotation = new Euler();
@@ -97,10 +97,10 @@ class Object3D extends EventDispatcher {
 		this.matrix = new Matrix4();
 		this.matrixWorld = new Matrix4();
 
-		this.matrixAutoUpdate = Object3D.DefaultMatrixAutoUpdate;
+		this.matrixAutoUpdate = Object3D.DEFAULT_MATRIX_AUTO_UPDATE;
 		this.matrixWorldNeedsUpdate = false;
 
-		this.matrixWorldAutoUpdate = Object3D.DefaultMatrixWorldAutoUpdate; // checked by the renderer
+		this.matrixWorldAutoUpdate = Object3D.DEFAULT_MATRIX_WORLD_AUTO_UPDATE; // checked by the renderer
 
 		this.layers = new Layers();
 		this.visible = true;
@@ -467,6 +467,28 @@ class Object3D extends EventDispatcher {
 		}
 
 		return undefined;
+
+	}
+
+	getObjectsByProperty( name, value ) {
+
+		let result = [];
+
+		if ( this[ name ] === value ) result.push( this );
+
+		for ( let i = 0, l = this.children.length; i < l; i ++ ) {
+
+			const childResult = this.children[ i ].getObjectsByProperty( name, value );
+
+			if ( childResult.length > 0 ) {
+
+				result = result.concat( childResult );
+
+			}
+
+		}
+
+		return result;
 
 	}
 
@@ -941,8 +963,8 @@ class Object3D extends EventDispatcher {
 
 }
 
-Object3D.DefaultUp = /*@__PURE__*/ new Vector3( 0, 1, 0 );
-Object3D.DefaultMatrixAutoUpdate = true;
-Object3D.DefaultMatrixWorldAutoUpdate = true;
+Object3D.DEFAULT_UP = /*@__PURE__*/ new Vector3( 0, 1, 0 );
+Object3D.DEFAULT_MATRIX_AUTO_UPDATE = true;
+Object3D.DEFAULT_MATRIX_WORLD_AUTO_UPDATE = true;
 
 export { Object3D };
