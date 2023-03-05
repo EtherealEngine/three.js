@@ -21025,11 +21025,7 @@ console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated 
 
 			_maxTextureSize = _capabilities.maxTextureSize;
 
-<<<<<<< HEAD
-		const shadowSide = { [ FrontSide ]: BackSide, [ BackSide ]: FrontSide, [ DoubleSide ]: DoubleSide, [ TwoPassDoubleSide ]: DoubleSide };
-=======
 		const shadowSide = { [ FrontSide ]: BackSide, [ BackSide ]: FrontSide, [ DoubleSide ]: DoubleSide };
->>>>>>> a2e9b10cb814d441202c8e5e5c3c4975e37e59a3
 
 		const shadowMaterialVertical = new ShaderMaterial( {
 			defines: {
@@ -51264,11 +51260,7 @@ console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated 
 	exports.WebGLArrayRenderTarget = WebGLArrayRenderTarget;
 	exports.WebGLCubeRenderTarget = WebGLCubeRenderTarget;
 	exports.WebGLMultipleRenderTargets = WebGLMultipleRenderTargets;
-<<<<<<< HEAD
-	exports.WebGLMultisampleRenderTarget = WebGLMultisampleRenderTarget;
 	exports.WebGLMultiviewRenderTarget = WebGLMultiviewRenderTarget;
-=======
->>>>>>> a2e9b10cb814d441202c8e5e5c3c4975e37e59a3
 	exports.WebGLRenderTarget = WebGLRenderTarget;
 	exports.WebGLRenderer = WebGLRenderer;
 	exports.WebGLUtils = WebGLUtils;
