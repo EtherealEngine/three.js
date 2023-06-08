@@ -28105,6 +28105,7 @@ console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated 
 				preserveDrawingBuffer = false,
 				powerPreference = 'default',
 				failIfMajorPerformanceCaveat = false,
+				multiviewStereo
 			} = parameters;
 
 			this.isWebGLRenderer = true;
@@ -28383,7 +28384,7 @@ console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated 
 
 			// xr
 
-			this.xr = new WebXRManager( _this, _gl, extensions, _multiviewStereo );
+			this.xr = new WebXRManager( _this, _gl, extensions, multiviewStereo );
 
 			this.getContext = function () {
 
@@ -29591,6 +29592,7 @@ console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated 
 				const morphColors = !! geometry.morphAttributes.color;
 				const toneMapping = material.toneMapped ? _this.toneMapping : NoToneMapping;
 
+				const numMultiviewViews = _currentRenderTarget && _currentRenderTarget.isWebGLMultiviewRenderTarget ? _currentRenderTarget.numViews : 0;
 				const morphAttribute = geometry.morphAttributes.position || geometry.morphAttributes.normal || geometry.morphAttributes.color;
 				const morphTargetsCount = ( morphAttribute !== undefined ) ? morphAttribute.length : 0;
 

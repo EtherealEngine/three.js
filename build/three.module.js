@@ -28098,6 +28098,7 @@ class WebGLRenderer {
 			preserveDrawingBuffer = false,
 			powerPreference = 'default',
 			failIfMajorPerformanceCaveat = false,
+			multiviewStereo
 		} = parameters;
 
 		this.isWebGLRenderer = true;
@@ -28376,7 +28377,7 @@ class WebGLRenderer {
 
 		// xr
 
-		this.xr = new WebXRManager( _this, _gl, extensions, _multiviewStereo );
+		this.xr = new WebXRManager( _this, _gl, extensions, multiviewStereo );
 
 		this.getContext = function () {
 
@@ -29584,6 +29585,7 @@ class WebGLRenderer {
 			const morphColors = !! geometry.morphAttributes.color;
 			const toneMapping = material.toneMapped ? _this.toneMapping : NoToneMapping;
 
+			const numMultiviewViews = _currentRenderTarget && _currentRenderTarget.isWebGLMultiviewRenderTarget ? _currentRenderTarget.numViews : 0;
 			const morphAttribute = geometry.morphAttributes.position || geometry.morphAttributes.normal || geometry.morphAttributes.color;
 			const morphTargetsCount = ( morphAttribute !== undefined ) ? morphAttribute.length : 0;
 
