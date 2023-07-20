@@ -2093,25 +2093,20 @@ class WebGLRenderer {
 			properties.get( renderTarget.depthTexture ).__webglTexture = depthTexture;
 
 			const renderTargetProperties = properties.get( renderTarget );
-			renderTargetProperties.__hasExternalTextures = true;
+			renderTargetProperties.__hasExternalTextures = true;			renderTargetProperties.__hasExternalTextures = true;
 
-			if ( renderTargetProperties.__hasExternalTextures ) {
+			renderTargetProperties.__autoAllocateDepthBuffer = depthTexture === undefined;
 
-				renderTargetProperties.__autoAllocateDepthBuffer = depthTexture === undefined;
+			if ( ! renderTargetProperties.__autoAllocateDepthBuffer && ! _currentRenderTarget.isWebGLMultiviewRenderTarget ) {
 
-				if ( ! renderTargetProperties.__autoAllocateDepthBuffer ) {
+				// The multisample_render_to_texture extension doesn't work properly if there
+				// are midframe flushes and an external depth buffer. Disable use of the extension.
+				if ( extensions.has( 'WEBGL_multisampled_render_to_texture' ) === true ) {
 
-					// The multisample_render_to_texture extension doesn't work properly if there
-					// are midframe flushes and an external depth buffer. Disable use of the extension.
-					if ( extensions.has( 'WEBGL_multisampled_render_to_texture' ) === true ) {
-
-						console.warn( 'THREE.WebGLRenderer: Render-to-texture extension was disabled because an external texture was provided' );
-						renderTargetProperties.__useRenderToTexture = false;
-
-					}
+					console.warn( 'THREE.WebGLRenderer: Render-to-texture extension was disabled because an external texture was provided' );
+					renderTargetProperties.__useRenderToTexture = false;
 
 				}
-
 			}
 
 		};
