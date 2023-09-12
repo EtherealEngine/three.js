@@ -1028,7 +1028,8 @@ class WebGLRenderer {
 			( callback === null ) ? animation.stop() : animation.start();
 
 		};
-		this.animation = animation
+
+		this.animation = animation;
 
 		this.xr.addEventListener( 'sessionstart', onXRSessionStart );
 		this.xr.addEventListener( 'sessionend', onXRSessionEnd );
@@ -1059,6 +1060,7 @@ class WebGLRenderer {
 				if ( this.xr.cameraAutoUpdate === true ) this.xr.updateCamera( camera );
 
 				camera = this.xr.getCamera(); // use XR camera for rendering
+
 			}
 
 			//
@@ -1885,11 +1887,11 @@ class WebGLRenderer {
 					object.isSkinnedMesh ) {
 
 					if ( program.numMultiviewViews > 0 ) {
-	
+
 						multiview.updateCameraViewMatricesUniform( camera, p_uniforms );
-	
+
 					} else {
-		
+
 						p_uniforms.setValue( _gl, 'viewMatrix', camera.matrixWorldInverse );
 
 					}
@@ -2107,6 +2109,7 @@ class WebGLRenderer {
 					renderTargetProperties.__useRenderToTexture = false;
 
 				}
+
 			}
 
 		};
