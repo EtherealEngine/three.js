@@ -371,9 +371,7 @@ class WebGLRenderer {
 
 		// xr
 
-		const xr = new WebXRManager( _this, _gl, extensions, multiviewStereo );
-
-		this.xr = xr;
+		this.xr = new WebXRManager( _this, _gl, extensions, multiviewStereo );
 
 		// API
 
@@ -427,7 +425,7 @@ class WebGLRenderer {
 
 		this.setSize = function ( width, height, updateStyle = true ) {
 
-			if ( xr.isPresenting ) {
+			if ( this.xr.isPresenting ) {
 
 				console.warn( 'THREE.WebGLRenderer: Can\'t change size while VR device is presenting.' );
 				return;
@@ -675,10 +673,10 @@ class WebGLRenderer {
 			uniformsGroups.dispose();
 			programCache.dispose();
 
-			xr.dispose();
+			this.xr.dispose();
 
-			xr.removeEventListener( 'sessionstart', onXRSessionStart );
-			xr.removeEventListener( 'sessionend', onXRSessionEnd );
+			this.xr.removeEventListener( 'sessionstart', onXRSessionStart );
+			this.xr.removeEventListener( 'sessionend', onXRSessionEnd );
 
 			if ( _transmissionRenderTarget ) {
 
@@ -1024,14 +1022,16 @@ class WebGLRenderer {
 		this.setAnimationLoop = function ( callback ) {
 
 			onAnimationFrameCallback = callback;
-			xr.setAnimationLoop( callback );
+			this.xr.setAnimationLoop( callback );
 
 			( callback === null ) ? animation.stop() : animation.start();
 
 		};
 
-		xr.addEventListener( 'sessionstart', onXRSessionStart );
-		xr.addEventListener( 'sessionend', onXRSessionEnd );
+
+		this.animation = animation;
+		this.xr.addEventListener( 'sessionstart', onXRSessionStart );
+		this.xr.addEventListener( 'sessionend', onXRSessionEnd );
 
 		// Rendering
 
@@ -1054,11 +1054,11 @@ class WebGLRenderer {
 
 			if ( camera.parent === null && camera.matrixWorldAutoUpdate === true ) camera.updateMatrixWorld();
 
-			if ( xr.enabled === true && xr.isPresenting === true ) {
+			if ( this.xr.enabled === true && this.xr.isPresenting === true ) {
 
-				if ( xr.cameraAutoUpdate === true ) xr.updateCamera( camera );
+				if ( this.xr.cameraAutoUpdate === true ) this.xr.updateCamera( camera );
 
-				camera = xr.getCamera(); // use XR camera for rendering
+				camera = this.xr.getCamera(); // use XR camera for rendering
 
 			}
 
@@ -1118,7 +1118,7 @@ class WebGLRenderer {
 
 			if ( camera.isArrayCamera ) {
 
-				if ( xr.enabled && xr.isMultiview ) {
+				if ( this.xr.enabled && this.xr.isMultiview ) {
 
 					textures.deferTextureUploads = true;
 
@@ -1810,13 +1810,25 @@ class WebGLRenderer {
 
 			if ( refreshProgram || _currentCamera !== camera ) {
 
+				// common camera uniforms
+
 				if ( program.numMultiviewViews > 0 ) {
 
-					multiview.updateCameraProjectionMatricesUniform( camera, p_uniforms );
+					multiview.updateCameraViewMatricesUniform( camera, p_uniforms );
+					multiview.updateObjectMatricesUniforms( object, camera, p_uniforms );
 
 				} else {
 
 					p_uniforms.setValue( _gl, 'projectionMatrix', camera.projectionMatrix );
+				  p_uniforms.setValue( _gl, 'viewMatrix', camera.matrixWorldInverse );
+
+				}
+
+				const uCamPos = p_uniforms.map.cameraPosition;
+
+				if ( uCamPos !== undefined ) {
+
+					uCamPos.setValue( _gl, _vector3.setFromMatrixPosition( camera.matrixWorld ) );
 
 				}
 
@@ -1850,58 +1862,6 @@ class WebGLRenderer {
 
 					refreshMaterial = true;		// set to true on material change
 					refreshLights = true;		// remains set until update done
-
-				}
-
-				// load material specific uniforms
-				// (shader material also gets them for the sake of genericity)
-
-				if ( material.isShaderMaterial ||
-					material.isMeshPhongMaterial ||
-					material.isMeshToonMaterial ||
-					material.isMeshStandardMaterial ||
-					material.envMap ) {
-
-					const uCamPos = p_uniforms.map.cameraPosition;
-
-					if ( uCamPos !== undefined ) {
-
-						uCamPos.setValue( _gl,
-							_vector3.setFromMatrixPosition( camera.matrixWorld ) );
-
-					}
-
-				}
-
-				if ( material.isMeshPhongMaterial ||
-					material.isMeshToonMaterial ||
-					material.isMeshLambertMaterial ||
-					material.isMeshBasicMaterial ||
-					material.isMeshStandardMaterial ||
-					material.isShaderMaterial ) {
-
-					p_uniforms.setValue( _gl, 'isOrthographic', camera.isOrthographicCamera === true );
-
-				}
-
-				if ( material.isMeshPhongMaterial ||
-					material.isMeshToonMaterial ||
-					material.isMeshLambertMaterial ||
-					material.isMeshBasicMaterial ||
-					material.isMeshStandardMaterial ||
-					material.isShaderMaterial ||
-					material.isShadowMaterial ||
-					object.isSkinnedMesh ) {
-
-					if ( program.numMultiviewViews > 0 ) {
-
-						multiview.updateCameraViewMatricesUniform( camera, p_uniforms );
-
-					} else {
-
-						p_uniforms.setValue( _gl, 'viewMatrix', camera.matrixWorldInverse );
-
-					}
 
 				}
 
