@@ -1814,13 +1814,13 @@ class WebGLRenderer {
 
 				if ( program.numMultiviewViews > 0 ) {
 
+					multiview.updateCameraProjectionMatricesUniform( camera, p_uniforms );
 					multiview.updateCameraViewMatricesUniform( camera, p_uniforms );
-					multiview.updateObjectMatricesUniforms( object, camera, p_uniforms );
 
 				} else {
 
 					p_uniforms.setValue( _gl, 'projectionMatrix', camera.projectionMatrix );
-				  p_uniforms.setValue( _gl, 'viewMatrix', camera.matrixWorldInverse );
+				    p_uniforms.setValue( _gl, 'viewMatrix', camera.matrixWorldInverse );
 
 				}
 
