@@ -1299,7 +1299,8 @@ class WebGLRenderer {
 
 			if ( object.visible === false ) return;
 
-			const visible = object.layers.test( camera.layers );
+			// layers are handled in WebGLRendererSystem with optimized ECS SoA
+			const visible = true; //object.layers.test( camera.layers );
 
 			if ( visible ) {
 

@@ -29840,9 +29840,7 @@ console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated 
 
 				if ( object.visible === false ) return;
 
-				const visible = object.layers.test( camera.layers );
-
-				if ( visible ) {
+				{
 
 					if ( object.isGroup ) {
 
