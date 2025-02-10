@@ -71,7 +71,7 @@ class WebGLRenderer {
 			preserveDrawingBuffer = false,
 			powerPreference = 'default',
 			failIfMajorPerformanceCaveat = false,
-			multiviewStereo = true,
+			multiviewStereo = false,
 			reverseDepthBuffer = false,
 		} = parameters;
 
